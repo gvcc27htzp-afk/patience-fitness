@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Patience">
+<meta name="format-detection" content="telephone=no">
+<title>Patience</title>
+<style>
+:root{
+  --bg:#0a0a0c; --bg2:#101013;
+  --card:#141417; --card2:#1b1b1f;
+  --line:rgba(255,255,255,.08);
+  --fg:#f5f5f7; --muted:rgba(245,245,245,.6); --terse:rgba(245,245,245,.4);
+  --accent:#ff7a18; --accent-soft:rgba(255,122,24,.15); --accent-glow:rgba(255,122,24,.35);
+  --ok:#34c759; --warn:#ff9f0a; --danger:#ff453a;
+  --font-sf:'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,"PingFang SC",-apple-system,BlinkMacSystemFont,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--font-sf);overscroll-behavior-y:contain;-webkit-font-smoothing:antialiased;letter-spacing:.005em;color-scheme:dark}
+.app{max-width:520px;margin:0 auto;min-height:100dvh;background:var(--bg);position:relative;overflow:hidden;padding-bottom:84px}
+.app::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(600px 380px at 15% -10%,rgba(255,122,24,.18),transparent 55%),radial-gradient(520px 320px at 110% 20%,rgba(60,110,200,.12),transparent 55%),radial-gradient(820px 500px at 50% 110%,rgba(20,20,26,1) 0%,rgba(10,10,12,1) 70%)}
+.nav{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;height:44px;z-index:50;display:flex;align-items:center;padding:0 20px;background:rgba(0,0,0,.32);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);border-bottom:1px solid rgba(255,255,255,.05)}
+.nav .nav-logo{font-family:var(--font-sf);font-weight:600;font-size:14px;letter-spacing:.02em;color:#f5f5f7;display:flex;align-items:center;gap:8px}
+.nav .nav-logo::before{content:"";width:6px;height:6px;border-radius:50%;background:#ff7a18;box-shadow:0 0 8px rgba(255,122,24,.7)}
+.nav .nav-center{display:flex;gap:16px;margin-left:auto}
+.nav .nav-center a{color:rgba(245,245,245,.55);font-size:12px;font-weight:400;text-decoration:none;letter-spacing:.01em;transition:color .15s}
+.nav .nav-center a:hover{color:#f5f5f7}
+.nav .nav-right{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;margin-left:14px}
+.nav-right .sub{color:rgba(245,245,245,.4);font-size:9px}
+.nav-right .badge{color:rgba(245,245,245,.75);font-size:11px;font-weight:500;letter-spacing:.015em}
+main{position:relative;z-index:1}
+.page{display:none;animation:pageIn .55s cubic-bezier(.22,.61,.36,1)}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.hero{min-height:90dvh;padding:72px 24px 56px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;text-align:center;overflow:hidden}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;pointer-events:none;filter:blur(40px);opacity:.75}
+.hero::before{width:520px;height:520px;background:radial-gradient(circle,rgba(255,122,24,.32),transparent 65%);top:-180px;left:50%;transform:translateX(-55%)}
+.hero::after{width:380px;height:380px;background:radial-gradient(circle,rgba(60,110,200,.18),transparent 65%);bottom:-120px;right:-30px}
+.hero-inner{position:relative;z-index:2}
+.hero-eyebrow{font-size:11px;color:var(--terse);letter-spacing:.18em;text-transform:uppercase;margin-bottom:26px}
+.hero-title{font-family:'SF Pro Display','Helvetica Neue',Helvetica,-apple-system,sans-serif;font-weight:200;font-size:clamp(44px,14vw,72px);line-height:1.02;letter-spacing:.02em;color:#f5f5f7;margin-bottom:14px}
+.hero-title b{font-weight:300;color:var(--accent)}
+.hero-sub{font-size:16px;color:var(--muted);font-weight:400;letter-spacing:.01em;margin-bottom:40px;max-width:320px;line-height:1.55}
+.ring-wrap{position:relative;width:200px;height:200px;margin:8px auto 34px}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:6}
+.ring-fill{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;filter:drop-shadow(0 0 6px rgba(255,122,24,.5));transition:stroke-dashoffset .6s cubic-bezier(.22,.61,.36,1)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-num{font-family:'SF Pro Display','Helvetica Neue',Helvetica,-apple-system,sans-serif;font-weight:200;font-size:56px;letter-spacing:.01em;color:#f5f5f7;line-height:1}
+.ring-num .unit{font-size:22px;color:var(--terse);margin-left:4px;font-weight:300}
+.ring-label{font-size:11px;color:var(--terse);letter-spacing:.18em;text-transform:uppercase;margin-top:10px}
+.cta-row{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap}
+.cta-primary{background:#f5f5f7;color:#0a0a0c;border:none;border-radius:999px;padding:13px 28px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;min-height:44px;letter-spacing:.01em;transition:transform .12s}
+.cta-primary:active{transform:scale(.97)}
+.cta-secondary{background:transparent;color:#f5f5f7;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:13px 22px;font-size:14px;font-weight:400;font-family:inherit;cursor:pointer;min-height:44px;letter-spacing:.01em;display:inline-flex;align-items:center;gap:6px;transition:border-color .15s}
+.cta-secondary:hover{border-color:rgba(255,255,255,.5)}
+.cta-secondary::after{content:"›";font-size:17px;transition:transform .15s}
+.cta-secondary:hover::after{transform:translateX(3px)}
+.sec{padding:40px 24px 24px;position:relative;z-index:2}
+.sec h2{font-family:'SF Pro Display','Helvetica Neue',Helvetica,-apple-system,sans-serif;font-size:clamp(26px,6vw,34px);font-weight:600;letter-spacing:-.01em;color:#f5f5f7;margin-bottom:14px;line-height:1.15}
+.sec h2+p{font-size:15px;color:var(--muted);margin-bottom:28px}
+.sec-eyebrow{font-size:10px;color:var(--terse);letter-spacing:.22em;text-transform:uppercase;margin-bottom:10px;font-weight:500}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;margin-bottom:14px;transition:transform .18s,border-color .18s}
+.card:hover{border-color:rgba(255,255,255,.15)}
+.card:active{transform:translateY(-1px)}
+.card h3{font-size:15px;font-weight:500;color:#f5f5f7;margin-bottom:12px;letter-spacing:.005em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stats .s{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px 10px;text-align:center}
+.stats .s .v{font-family:'SF Pro Display','Helvetica Neue',Helvetica,-apple-system,sans-serif;font-size:24px;font-weight:300;color:#f5f5f7;letter-spacing:.01em}
+.stats .s .l{font-size:11px;color:var(--terse);margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
+.stats .s.ok .v{color:var(--accent)}
+.bar{height:4px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:999px;transition:width .5s cubic-bezier(.22,.61,.36,1)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
+.week .d{text-align:center;padding:12px 0;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);font-size:12px}
+.week .d .n{font-weight:500;font-size:14px;color:#f5f5f7;margin-bottom:4px}
+.week .d.today{border-color:rgba(255,122,24,.35);background:rgba(255,122,24,.08)}
+.week .d.done{background:rgba(52,199,89,.08);border-color:rgba(52,199,89,.35)}
+.week .d.rest{background:rgba(255,159,10,.06);border-color:rgba(255,159,10,.25)}
+.ex{display:flex;gap:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);margin-bottom:10px;align-items:flex-start;transition:border-color .15s}
+.ex:active{border-color:rgba(255,255,255,.12)}
+.ex-icon{width:44px;height:44px;border-radius:12px;flex:0 0 44px;display:grid;place-items:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:22px}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-size:15px;font-weight:500;color:#f5f5f7;margin-bottom:4px;letter-spacing:.005em;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ex-meta{font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+.ex-tip{background:rgba(255,122,24,.05);border-left:2px solid rgba(255,122,24,.5);padding:8px 12px;border-radius:0 10px 10px 0;font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
+.check{width:26px;height:26px;border-radius:8px;border:2px solid rgba(255,255,255,.2);flex:0 0 26px;margin-top:9px;cursor:pointer;display:grid;place-items:center;background:rgba(255,255,255,.02);transition:all .18s}
+.check.done{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,122,24,.15)}
+.check.done::after{content:"✓";color:#0a0a0c;font-weight:900;font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:10px 18px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#f5f5f7;font-size:14px;font-weight:400;cursor:pointer;transition:transform .08s,background .15s,border-color .15s;font-family:inherit;letter-spacing:.005em}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#0a0a0c;font-weight:500;box-shadow:0 6px 20px rgba(255,122,24,.25)}
+.btn.ghost{background:transparent;border-color:rgba(255,255,255,.15);color:var(--muted)}
+.btn.danger{background:rgba(255,69,58,.08);border-color:rgba(255,69,58,.2);color:#ff8a80}
+.btn.full{width:100%}
+.btn+.btn{margin-left:10px}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);font-size:11px;font-weight:400;letter-spacing:.02em}
+.tag.ok{background:rgba(52,199,89,.1);color:#86efac}
+.tag.warn{background:rgba(255,159,10,.1);color:#ffb86b}
+.tag.accent{background:rgba(255,122,24,.12);color:var(--accent)}
+.input-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.input-row label{font-size:12px;color:var(--terse);flex:0 0 80px;letter-spacing:.04em;text-transform:uppercase}
+.input-row input{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:11px 14px;color:#f5f5f7;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s}
+.input-row input:focus{border-color:rgba(255,122,24,.5);background:rgba(255,122,24,.04)}
+.video-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.video-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:12px;cursor:pointer;text-decoration:none;color:inherit;display:block;transition:transform .15s,border-color .15s}
+.video-card:active{transform:translateY(-2px);border-color:rgba(255,122,24,.4)}
+.video-card .vt{height:74px;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;font-size:28px;margin-bottom:10px;position:relative}
+.video-card .vt::after{content:"▶";position:absolute;font-size:18px;color:rgba(255,122,24,.9);filter:drop-shadow(0 0 4px rgba(255,122,24,.5))}
+.video-card .vtitle{font-size:12px;font-weight:500;color:#f5f5f7;line-height:1.4}
+.plan-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:14px}
+.plan-row:last-child{border-bottom:none}
+.plan-row b{font-weight:500;color:#f5f5f7}
+.metric-log{max-height:260px;overflow-y:auto;margin-top:6px}
+.metric-log .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:14px}
+.metric-log .row:last-child{border-bottom:none}
+.empty{text-align:center;color:var(--terse);padding:28px 10px;font-size:14px}
+.hr{height:1px;background:rgba(255,255,255,.06);margin:14px 0}
+.tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;z-index:40;background:rgba(10,10,12,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:1px solid rgba(255,255,255,.06);padding-bottom:env(safe-area-inset-bottom)}
+.tablist{display:grid;grid-template-columns:repeat(6,1fr);padding:6px 0 12px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:rgba(245,245,245,.45);cursor:pointer;font-size:10px;font-weight:400;min-height:50px;justify-content:center;letter-spacing:.01em;transition:color .15s}
+.tab .ic{font-size:18px;line-height:1}
+.tab.active{color:#f5f5f7}
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-mask.show{display:flex;animation:fadeIn .3s ease}
+.modal{width:100%;max-width:520px;background:#141417;border-top:1px solid rgba(255,255,255,.08);border-radius:22px 22px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));max-height:85dvh;overflow-y:auto;animation:slideUp .35s cubic-bezier(.22,.61,.36,1)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.modal h3{font-size:16px;font-weight:500;color:#f5f5f7;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;letter-spacing:.005em}
+.modal .close{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);border:none;color:#f5f5f7;cursor:pointer;font-size:16px;font-weight:500}
+.toast{color:#0a0a0c;position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#f5f5f7;padding:12px 22px;border-radius:12px;font-size:14px;font-weight:500;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,.4);opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
+textarea{width:100%;min-height:220px;background:#0a0a0c;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;color:#f5f5f7;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.6;resize:vertical}
+textarea#exportTA{min-height:260px;color:var(--accent);background:#101013}
+.pg{position:fixed;inset:0;z-index:9999;background:#0a0a0c;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:40px;animation:fadeIn .6s cubic-bezier(.22,.61,.36,1)}
+.pg.hidden{display:none}
+.pg-logo{font-family:'SF Pro Display','Helvetica Neue',Helvetica,-apple-system,sans-serif;font-weight:200;font-size:44px;letter-spacing:.02em;color:#f5f5f7}
+.pg-logo span{color:#ff7a18}
+.pg-sub{font-size:13px;color:rgba(245,245,245,.5);letter-spacing:.12em;text-transform:uppercase}
+.pg-box{width:100%;max-width:320px;background:rgba(20,20,23,.6);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:24px;backdrop-filter:blur(20px)}
+.pg-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;color:#f5f5f7;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s;letter-spacing:.03em}
+.pg-input:focus{border-color:rgba(255,122,24,.5);background:rgba(255,122,24,.04)}
+.pg-input::placeholder{color:rgba(245,245,245,.3)}
+.pg-btn{width:100%;margin-top:14px;background:#ff7a18;border:none;border-radius:999px;padding:14px;color:#0a0a0c;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:transform .08s}
+.pg-btn:active{transform:scale(.98)}
+.pg-err{font-size:12px;color:#ff8a80;margin-top:10px;text-align:center;min-height:16px}
+.pg-hint{font-size:11px;color:rgba(245,245,245,.3);margin-top:20px;text-align:center}
+@media (max-width:380px){.video-grid{grid-template-columns:1fr}}
+</style>
+<script>
+window.__pgErr=null;
+window.addEventListener("error",function(e){
+  var msg="JS错误: "+(e.message||"unknown")+" @"+(e.lineno||"?");
+  window.__pgErr=msg;
+  var el=document.getElementById("pgErr");
+  if(el){el.textContent=msg;}
+});
+</script>
+</head>
+<body>
+<!-- Password Gate -->
+<div class="pg" id="pgGate">
+  <div style="text-align:center"><div class="pg-logo">Patience<span>.</span></div><div class="pg-sub">Private · 私有训练助手</div></div>
+  <div class="pg-box">
+    <form id="pgForm" style="margin:0;padding:0" onsubmit="return false">
+      <input class="pg-input" id="pgInput" type="text" onkeydown="if(event.key==='Enter'){event.preventDefault();window.tryAuth&&window.tryAuth();return false;}" placeholder="输入密码" autocomplete="off" autofocus enterkeyhint="go" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <div style="text-align:center;font-size:12px;color:rgba(245,245,245,.4);margin:-6px 0 4px;">v10-静态 · 密码：luzixuan990726.</div>
+      <button class="pg-btn" id="pgBtn" type="button" onclick="window.tryAuth&&window.tryAuth();return false;">进入</button>
+    </form>
+    <div class="pg-err" id="pgErr"></div>
+  </div>
+  <div class="pg-hint">密码保存在本设备 · 7 天后需重新输入</div>
+</div>
+
+<div class="app">
+  <nav class="nav">
+    <div class="nav-logo">Patience</div>
+    <div class="nav-center">
+      <a data-link="library">动作</a>
+      <a data-link="video">视频</a>
+      <a data-link="diet">饮食</a>
+    </div>
+    <div class="nav-right"><span class="sub" id="subInfo">—</span><span class="badge" id="weekBadge">—</span></div>
+  </nav>
+  <main>
+    <section class="page active" data-page="plan">加载中...</section>
+    <section class="page" data-page="library">加载中...</section>
+    <section class="page" data-page="video">加载中...</section>
+    <section class="page" data-page="diet">加载中...</section>
+    <section class="page" data-page="log">加载中...</section>
+    <section class="page" data-page="me">加载中...</section>
+  </main>
+  <nav class="tabbar">
+    <div class="tablist">
+      <div class="tab active" data-tab="plan"><span class="ic">📅</span><span>今日</span></div>
+      <div class="tab" data-tab="library"><span class="ic">📚</span><span>动作</span></div>
+      <div class="tab" data-tab="video"><span class="ic">🎬</span><span>视频</span></div>
+      <div class="tab" data-tab="diet"><span class="ic">🥗</span><span>饮食</span></div>
+      <div class="tab" data-tab="log"><span class="ic">📊</span><span>记录</span></div>
+      <div class="tab" data-tab="me"><span class="ic">👤</span><span>我的</span></div>
+    </div>
+  </nav>
+</div>
+<div class="modal-mask" id="modal"><div class="modal">
+  <h3><span id="modalTitle">详情</span><button class="close" id="modalClose">✕</button></h3>
+  <div id="modalBody"></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== Password Gate ===== */
+(function initGate(){
+  const PW="luzixuan990726.";
+  const AUTH_KEY="patience_auth_v1";
+  const gate=document.getElementById("pgGate");
+  const form=document.getElementById("pgForm");
+  const input=document.getElementById("pgInput");
+  const btn=document.getElementById("pgBtn");
+  const err=document.getElementById("pgErr");
+  // 检查已有 auth
+  try{
+    const stored=JSON.parse(localStorage.getItem(AUTH_KEY)||"null");
+    if(stored&&stored.pw===PW&&stored.exp>Date.now()){
+      gate.classList.add("hidden");
+      return;
+    }
+  }catch(e){}
+  // JS 存活标记：把静态提示改写为"运行中"
+  try{
+    var hintEl=document.querySelector(".pg-box div[style]");
+    var marks=document.querySelectorAll(".pg-box div");
+    for(var mi=0;mi<marks.length;mi++){ if(marks[mi].textContent.indexOf("v10-静态")===0){ marks[mi].textContent="v10-JS运行中 · 密码：luzixuan990726."; } }
+  }catch(e){}
+  function normalize(s){
+    // 只保留小写字母/数字/英文点，无视空格、中文句号、大小写、不可见字符
+    return (s||"").toLowerCase().replace(/。/g,".").replace(/[^a-z0-9.]/g,"");
+  }
+  window.tryAuth=function(){
+    const raw=input.value;
+    const v=normalize(raw);
+    const ok = v===PW || v===PW.replace(/\.$/,"");
+    if(ok){
+      try{ localStorage.setItem(AUTH_KEY,JSON.stringify({pw:PW,exp:Date.now()+7*24*60*60*1000})); }catch(e){}
+      err.textContent="";
+      gate.classList.add("hidden");
+      document.body.style.overflow="";
+    }else{
+      // 回显实际收到的内容和字符编码，便于定位输入法问题
+      const codes=[...raw].map(c=>c.charCodeAt(0).toString(16)).join(" ");
+      err.textContent="未通过，收到:「"+raw+"」("+codes+")";
+      btn.disabled=false;
+      btn.textContent="进入";
+    }
+  };
+  function tryAuth(){ window.tryAuth(); }
+  // 多通道绑定，任何一个生效都能进
+  form.addEventListener("submit",function(e){e.preventDefault();e.stopPropagation();tryAuth();return false;},true);
+  btn.addEventListener("click",function(e){e.preventDefault();tryAuth();});
+  input.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();tryAuth();}});
+  input.addEventListener("compositionend",function(){setTimeout(tryAuth,0);});
+})();
+
+/* ========== 1. DATA ========== */
+const DATA={
+  mon:{day:"周一",theme:"上肢力量（胸肩三头）",duration:"约60分钟",items:[
+    {id:"m1",name:"杠铃卧推",icon:"🏋️",sets:3,reps:"8次",rest:90,tips:"肩胛下压、杠触中胸沿弧线推回",video:"https://www.bilibili.com/video/BV1NGGz6QEEW/"},
+    {id:"m2",name:"上斜哑铃卧推",icon:"🏋️",sets:3,reps:"10次",rest:75,tips:"沿肩胛面弧形推起，肘不外展",video:"https://www.bilibili.com/video/BV1nNZRY3EJc/"},
+    {id:"m3",name:"肩上推举",icon:"💪",sets:3,reps:"8次",rest:90,tips:"核心收紧、肩胛面推起、不耸肩",video:"https://www.bilibili.com/video/BV1ym421M7DV/"},
+    {id:"m4",name:"哑铃侧平举",icon:"💪",sets:3,reps:"12次",rest:60,tips:"沿手背向外推开，锁肩防斜方代偿",video:"https://www.bilibili.com/video/BV1tt421M74E/"},
+    {id:"m5",name:"绳索下压(三头)",icon:"💪",sets:3,reps:"12次",rest:45,tips:"大臂夹紧固定、小臂沿弧线下压",video:"https://www.bilibili.com/video/BV1fjMyzZEt5/",backup:"https://www.bilibili.com/video/BV1Nn4y1d7jx/"},
+    {id:"m6",name:"坐姿卷腹机",icon:"🏋️",sets:3,reps:"15次",rest:45,tips:"胸口卷向骨盆、腰部贴紧靠垫、不要用手臂拉",video:"https://www.bilibili.com/video/BV18Mj36sEjs/"}
+  ]},
+  tue:{day:"周二",theme:"休息日",duration:"完全休息",isRest:true,skip:true,items:[{id:"t0",name:"完全休息",icon:"😴",sets:0,reps:"",rest:0,tips:"练后让肌肉和神经修复",video:""}]},
+  wed:{day:"周三",theme:"背部核心 + 腿轻塑形",duration:"约60分钟",items:[
+    {id:"w1",name:"高位下拉",icon:"🏋️",sets:4,reps:"10次",rest:75,tips:"沉肩、肘内夹带背阔、顶端停顿",video:"https://www.bilibili.com/video/BV1Vo9jY7Eks/"},
+    {id:"w2",name:"杠铃划船",icon:"🏋️",sets:3,reps:"10次",rest:75,tips:"俯身30-45度脊柱中立",video:"https://www.bilibili.com/video/BV1PUVWevEGE/"},
+    {id:"w3",name:"坐姿绳索划船",icon:"💪",sets:3,reps:"12次",rest:60,tips:"沉肩不耸肩、微前倾",video:"https://www.bilibili.com/video/BV1di9QYmEY8/"},
+    {id:"w4",name:"哑铃弯举",icon:"💪",sets:3,reps:"10次",rest:60,tips:"大臂贴身固定、肘为唯一轴",video:"https://www.bilibili.com/video/BV1Uop1znETY/"},
+    {id:"w5",name:"卷腹",icon:"🧘",sets:3,reps:"15次",rest:45,tips:"肩胛离地即可、腰部贴地",video:"https://www.bilibili.com/video/BV18Mj36sEjs/"},
+    {id:"w6",name:"徒手深蹲(轻)",icon:"🤸",sets:3,reps:"20次",rest:60,tips:"膝对脚尖不内扣、轻塑形",video:"https://www.bilibili.com/video/BV1bu9DBoEYh/"},
+    {id:"w7",name:"箭步蹲(轻)",icon:"🤸",sets:3,reps:"12次",rest:60,tips:"前膝同脚尖、躯干直立",video:"https://www.bilibili.com/video/BV1u6GA6dEXF/"}
+  ]},
+  thu:{day:"周四",theme:"休息日",duration:"完全休息",isRest:true,skip:true,items:[{id:"t0",name:"完全休息",icon:"😴",sets:0,reps:"",rest:0,tips:"让身体修复",video:""}]},
+  fri:{day:"周五",theme:"全身(上为主) + 有氧",duration:"约75分钟",items:[
+    {id:"f1",name:"坐姿肩推",icon:"💪",sets:3,reps:"10次",rest:75,tips:"沉肩控下放",video:"https://www.bilibili.com/video/BV1ym421M7DV/"},
+    {id:"f2",name:"俯身飞鸟(后束)",icon:"💪",sets:3,reps:"12次",rest:60,tips:"肩胛后缩带后束",video:"https://www.bilibili.com/video/BV1gcmXBJEgV/"},
+    {id:"f3",name:"高位下拉",icon:"🏋️",sets:3,reps:"10次",rest:75,tips:"同周三",video:"https://www.bilibili.com/video/BV1Vo9jY7Eks/"},
+    {id:"f4",name:"哑铃卧推",icon:"🏋️",sets:3,reps:"10次",rest:75,tips:"大臂45-60度、离心2-3秒",video:"https://www.bilibili.com/video/BV1Uf42197gf/"},
+    {id:"f5",name:"站姿提踵(轻)",icon:"🤸",sets:3,reps:"20次",rest:45,tips:"跟缓慢下落有拉伸、不加重量",video:"https://www.bilibili.com/video/BV1ExpEzZEkB/"},
+    {id:"f6",name:"快走/椭圆机",icon:"🏃",sets:1,reps:"20分钟",rest:0,tips:"心率110-130收尾",video:"https://www.bilibili.com/video/BV1sP27BqEcf/"}
+  ]},
+  sat:{day:"周六",theme:"完整上肢 + 有氧",duration:"约90分钟",items:[
+    {id:"s1",name:"上肢热身",icon:"🔥",sets:1,reps:"10分钟",rest:0,tips:"关节活动+轻量拉推",video:"https://www.bilibili.com/video/BV1NGGz6QEEW/"},
+    {id:"s2",name:"推/拉组合",icon:"🏋️",sets:4,reps:"10次",rest:75,tips:"大重量推拉组合",video:"https://www.bilibili.com/video/BV1PUVWevEGE/"},
+    {id:"s3",name:"哑铃肩推/侧平举",icon:"💪",sets:3,reps:"10次",rest:60,tips:"组合推肩",video:"https://www.bilibili.com/video/BV1ym421M7DV/"},
+    {id:"s4",name:"核心（卷腹机+悬垂举腿）",icon:"🏋️",sets:3,reps:"组合",rest:45,tips:"卷腹机15次 + 悬垂举腿12次，都在器械区完成",video:"https://www.bilibili.com/video/BV18Mj36sEjs/"},
+    {id:"s5",name:"腿轻塑形（徒手深蹲）",icon:"🤸",sets:3,reps:"20次",rest:60,tips:"不加重量",video:"https://www.bilibili.com/video/BV1bu9DBoEYh/"},
+    {id:"s6",name:"高强度间歇/爬坡走",icon:"🏃",sets:1,reps:"30分钟",rest:0,tips:"坡度10速度5，走1停1",video:"https://www.bilibili.com/video/BV1BrHXzSEy8/"}
+  ]},
+  sun:{day:"周日",theme:"恢复有氧",duration:"约30分钟",isRest:true,items:[
+    {id:"u1",name:"快走/慢走",icon:"🚶",sets:1,reps:"30分钟",rest:0,tips:"低心率 90-110",video:"https://www.bilibili.com/video/BV1sP27BqEcf/"}
+  ]}
+};
+const COOLDOWN={name:"训练后拉伸",icon:"🧘",sets:"5-10分钟",tips:"重点拉胸/肩前束/腘绳/小腿，小腿后侧靠墙30秒×3组",video:"https://www.bilibili.com/video/BV1QrGrzUE8F/"};
+const RING_CIRC=339.292;
+const RING_R=54;
+
+/* ========== 2. 数据层 ========== */
+const LS_KEY="feiran_fit_v1";
+const DEFAULT_DATA={schema:1,checkins:{},metrics:{weight:[],waist:[],sleep:[],body_fat:[]},progress:{}};
+function loadAll(){try{const r=JSON.parse(localStorage.getItem(LS_KEY)||"null");if(r&&r.schema===1){const d=Object.assign({},DEFAULT_DATA,r);d.metrics=Object.assign({},DEFAULT_DATA.metrics,r.metrics||{});for(const k of Object.keys(DEFAULT_DATA.metrics)){if(!Array.isArray(d.metrics[k]))d.metrics[k]=[];}return d;}}catch(e){}return JSON.parse(JSON.stringify(DEFAULT_DATA));}
+function saveAll(d){try{localStorage.setItem(LS_KEY,JSON.stringify(d));}catch(e){console.warn("保存数据失败",e);}}
+function dateKey(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function weekdayCode(d){d=d||new Date();return["sun","mon","tue","wed","thu","fri","sat"][d.getDay()];}
+
+/* ========== 3. renderPlan ========== */
+function renderPlan(){
+  const pg=document.querySelector('[data-page="plan"]');
+  const k=weekdayCode(); const plan=DATA[k]||{day:"今日",theme:"休息日",duration:"完全休息",skip:true,items:[]};
+  const dk=dateKey(); let doneCount=0;
+  const realItems=(plan.items||[]).filter(it=>it.id!=="t0");
+  realItems.forEach(it=>{if(data.checkins[dk+"_"+it.id])doneCount++;});
+  const total=realItems.length; const pct=total>0?doneCount/total:0;
+  const ringOffset=RING_CIRC*(1-pct);
+  const eyebrowLabel=plan.day+" · "+(plan.skip?(plan.isRest?"恢复":"休息日"):plan.theme.split("（")[0]);
+
+  let html=`<section class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">${eyebrowLabel}</div>
+      <h1 class="hero-title">Patience<b>.</b></h1>
+      <div class="hero-sub">${plan.skip?"让身体完整修复 · 一步一步":plan.theme+" · "+plan.duration}</div>
+      <div class="ring-wrap">
+        <svg width="200" height="200" viewBox="0 0 120 120">
+          <circle class="ring-track" cx="60" cy="60" r="${RING_R}"/>
+          <circle class="ring-fill" cx="60" cy="60" r="${RING_R}" stroke-dasharray="${RING_CIRC}" stroke-dashoffset="${ringOffset}"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-num">${doneCount}<span class="unit">/ ${realItems.length}</span></div>
+          <div class="ring-label">${plan.skip?"今日":"已完成"}</div>
+        </div>
+      </div>
+      <div class="cta-row">
+        ${plan.skip
+          ? `<button class="cta-secondary" data-link="me">查看档案</button>`
+          : `<button class="cta-primary" id="heroStart">开始今日打卡</button>`}
+        <button class="cta-secondary" data-link="library">查看动作</button>
+      </div>
+    </div>
+  </section>
+  <section class="sec">`;
+  if(!plan.skip){
+    html += `<div class="card">
+      <div class="stats">
+        <div class="s ok"><div class="v">${doneCount}/${total}</div><div class="l">已完成</div></div>
+        <div class="s"><div class="v">${Math.round(pct*100)}%</div><div class="l">进度</div></div>
+        <div class="s"><div class="v">${Object.keys(data.checkins).length}</div><div class="l">累计打卡</div></div>
+      </div>
+      <div class="bar"><div class="bar-fill" style="width:${Math.round(pct*100)}%"></div></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn ghost" id="resetToday">🔄 重置今日</button>
+        <button class="btn primary" id="markAllDone">一键完成</button>
+      </div>
+    </div>`;
+  }
+  html += `<div class="card"><div class="sec-eyebrow">周视图</div>${weekGrid()}</div>`;
+  if(!plan.skip){
+    html += `<div class="sec-eyebrow" style="margin:28px 4px 10px">今日动作</div>`;
+    realItems.forEach((it,i)=>{
+      const key=dk+"_"+it.id; const done=!!data.checkins[key];
+      html += `<div class="ex"><div class="check ${done?"done":""}" data-chk="${it.id}"></div>
+        <div class="ex-icon">${it.icon}</div>
+        <div class="ex-info" data-detail="${it.id}" style="cursor:pointer">
+          <div class="ex-name">${it.name} <span class="tag" style="margin-left:auto">${i+1}</span></div>
+          <div class="ex-meta"><span>${it.sets}×${it.reps}</span><span>休 ${it.rest}s</span></div>
+          <div class="ex-tip">${it.tips}</div>
+        </div></div>`;
+    });
+    html += `<div class="ex" style="background:rgba(255,122,24,.04);border-color:rgba(255,122,24,.18)">
+      <div class="ex-icon">🧘</div><div class="ex-info">
+        <div class="ex-name">训练后拉伸 · 必做</div>
+        <div class="ex-meta"><span>${COOLDOWN.sets}</span></div>
+        <div class="ex-tip">${COOLDOWN.tips}</div>
+        <a class="btn primary" href="${COOLDOWN.video}" target="_blank" rel="noopener" style="margin-top:10px">▶ 拉伸视频</a>
+      </div></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn ghost" id="resetToday2">🔄 重置今日</button>
+      <button class="btn primary" id="markAllDone2">一键完成</button>
+    </div>`;
+  } else {
+    html += `<div class="card" style="text-align:center;padding:32px">
+      <div style="font-size:44px;margin-bottom:10px">${plan.isRest?"🚶":"😴"}</div>
+      <div style="font-size:16px;color:#f5f5f7;font-weight:400;margin-bottom:6px">${plan.isRest?"恢复有氧":"完全休息"}</div>
+      <div style="font-size:13px;color:var(--muted)">让肌肉和神经完整修复</div>
+    </div>`;
+  }
+  html += `</section>
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-eyebrow">Patience 给你的今日提醒</div>
+    <div class="card" style="padding:16px 20px">
+      <div style="font-size:14px;line-height:2;color:#f5f5f7;letter-spacing:.005em">
+        <div>• 血常规小细胞低色素 → <b style="color:#ffb86b">有氧心率 110-130 即可</b></div>
+        <div>• 大腿小腿粗 → <b style="color:#ffb86b">轻塑形不加重量</b></div>
+        <div>• 碳水要吃但挪时机 → <b style="color:#86efac">训练前/后是黄金窗口</b></div>
+        <div>• 练后 <b style="color:#86efac">拉伸 5-10 分钟</b> + 多吃蛋白质</div>
+      </div>
+    </div>
+  </section>`;
+  pg.innerHTML=html;
+
+  // 绑定事件
+  pg.querySelectorAll('[data-chk]').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.chk;const key=dk+"_"+id;if(data.checkins[key])delete data.checkins[key];else data.checkins[key]=1;saveAll(data);renderPlan();}));
+  pg.querySelectorAll('[data-detail]').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.detail;let target=null;for(const wk of Object.keys(DATA)){const it=DATA[wk].items.find(x=>x.id===id);if(it){target=it;break;}}if(target)showExerciseDetail(target);}));
+  [['resetToday','重置今日打卡？'],['resetToday2','重置今日打卡？']].forEach(([id,msg])=>{const b=document.querySelector('#'+id);if(b)b.addEventListener('click',()=>{if(confirm(msg)){Object.keys(data.checkins).forEach(k=>{if(k.startsWith(dk))delete data.checkins[k];});saveAll(data);renderPlan();toast("已重置");}});});
+  [['markAllDone','全部完成？'],['markAllDone2','全部完成？']].forEach(([id,msg])=>{const b=document.querySelector('#'+id);if(b)b.addEventListener('click',()=>{if(!plan.skip&&confirm(msg)){realItems.forEach(it=>{data.checkins[dk+"_"+it.id]=1;});saveAll(data);renderPlan();toast("✓ 已完成");}});});
+  const hs=document.querySelector('#heroStart'); if(hs)hs.addEventListener('click',()=>{pg.querySelector('.check')?.click();});
+  pg.querySelectorAll('[data-link]').forEach(a=>a.addEventListener('click',e=>{
+    e.preventDefault();
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    const tab=a.dataset.link; const t=document.querySelector(`.tab[data-tab="${tab}"]`); if(t)t.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelector(`[data-page="${tab}"]`).classList.add('active');
+    updateTopBadge(); window.scrollTo({top:0,behavior:'smooth'});
+  }));
+}
+
+function weekGrid(){
+  const d=new Date(); const today=d.getDay(); const names=["日","一","二","三","四","五","六"];
+  let html=`<div class="week">`;
+  for(let i=0;i<7;i++){
+    const dd=new Date(d); dd.setDate(d.getDate()-today+i);
+    const k=weekdayCode(dd); const plan=DATA[k]||{skip:true,items:[]};
+    const items=(plan.items||[]).filter(it=>it.id!=="t0");
+    let cls=""; let status="待";
+    if(plan.skip){cls="rest";status="休";}
+    else{const done=items.length>0&&items.every(it=>data.checkins[dateKey(dd)+"_"+it.id]);if(done){cls+=" done";status="✓";}}
+    if(i===today){cls+=" today";}
+    html+=`<div class="d ${cls}"><div class="n">${names[i]}</div><div>${status}</div></div>`;
+  }
+  html+=`</div>`; return html;
+}
+
+/* ========== 4. renderLibrary ========== */
+function renderLibrary(){
+  const pg=document.querySelector('[data-page="library"]');
+  const sections=[
+    {k:"mon",label:"周一 · 上肢力量（胸肩三头）"},
+    {k:"wed",label:"周三 · 背部核心 + 腿轻塑形"},
+    {k:"fri",label:"周五 · 全身(上为主) + 有氧"},
+    {k:"sat",label:"周六 · 完整上肢 + 有氧"},
+    {k:"sun",label:"周日 · 恢复有氧"}
+  ];
+  let total=0; sections.forEach(s=>{total+=(DATA[s.k].items||[]).filter(i=>i.id!=="t0").length;});
+  let html=`<section class="hero" style="min-height:auto;padding-top:64px"><div class="hero-inner"><div class="hero-eyebrow">动作库</div><h1 class="hero-title">Library<b>.</b></h1><div class="hero-sub">${total} 个动作 · 按训练日分组</div></div></section><section class="sec">`;
+  sections.forEach(sec=>{
+    const p=DATA[sec.k];
+    html+=`<div class="card"><div class="sec-eyebrow">${sec.k==="sun"?"恢复":"训练"}</div><div style="font-size:16px;font-weight:500;color:#f5f5f7;margin-bottom:12px">${sec.label}</div>`;
+    (p.items||[]).forEach(it=>{if(it.id==="t0")return;
+      html+=`<div class="ex" data-lib="${it.id}"><div class="ex-icon">${it.icon}</div><div class="ex-info"><div class="ex-name">${it.name}</div><div class="ex-meta"><span>${it.sets}×${it.reps}</span><span>休 ${it.rest}s</span></div></div><span style="color:rgba(245,245,245,.3);align-self:center;font-size:18px">›</span></div>`;
+    }); html+=`</div>`;
+  });
+  html+=`<div class="card" style="padding:24px;text-align:center;background:rgba(255,122,24,.04);border-color:rgba(255,122,24,.15)"><div class="sec-eyebrow">每次必做</div><div style="font-size:16px;font-weight:500;color:#f5f5f7;margin-bottom:4px">训练后完整拉伸</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px">${COOLDOWN.tips}</div><a class="btn primary" href="${COOLDOWN.video}" target="_blank" rel="noopener">▶ B站拉伸视频</a></div></section>`;
+  pg.innerHTML=html;
+  pg.querySelectorAll('[data-lib]').forEach(el=>el.addEventListener('click',()=>{let target=null;for(const wk of Object.keys(DATA)){const it=DATA[wk].items.find(x=>x.id===el.dataset.lib);if(it){target=it;break;}}if(target)showExerciseDetail(target);}));
+}
+function showExerciseDetail(it){const body=`<div class="ex-meta" style="margin-bottom:14px"><span class="tag">组数 ${it.sets}</span><span class="tag">次数 ${it.reps}</span><span class="tag">休息 ${it.rest}s</span></div><div class="ex-tip" style="font-size:13px">💡 ${it.tips}</div><div class="hr"></div><a class="btn primary full" href="${it.video}" target="_blank" rel="noopener">▶ 前往 B站观看</a>${it.backup?`<div style="height:8px"></div><a class="btn ghost full" href="${it.backup}" target="_blank" rel="noopener">🔄 备用链接</a>`:""}`;openModal({title:it.icon+" "+it.name,body});}
+
+/* ========== 5. renderVideo ========== */
+function renderVideo(){
+  const pg=document.querySelector('[data-page="video"]');
+  const all=[]; ["mon","wed","fri","sat"].forEach(k=>{(DATA[k].items||[]).forEach(it=>{if(it.id!=="t0")all.push(Object.assign({_k:k},it));});});
+  let html=`<section class="hero" style="min-height:auto;padding-top:64px"><div class="hero-inner"><div class="hero-eyebrow">视频教学</div><h1 class="hero-title">Videos<b>.</b></h1><div class="hero-sub">${all.length} 个 B站教程 · 一步到位</div></div></section><section class="sec"><div class="video-grid">`;
+  all.forEach(it=>{html+=`<a class="video-card" href="${it.video}" target="_blank" rel="noopener"><div class="vt">${it.icon}</div><div class="vtitle">${it.name}</div><div style="font-size:10px;color:rgba(245,245,245,.4);margin-top:3px;letter-spacing:.03em">${DATA[it._k].day} · ${it.sets}×${it.reps}</div></a>`;});
+  html+=`</div></section><section class="sec"><div class="card" style="text-align:center;padding:24px;background:rgba(255,122,24,.04);border-color:rgba(255,122,24,.15)"><div class="sec-eyebrow">每次必看</div><div style="font-size:16px;font-weight:500;margin-bottom:12px">训练后完整拉伸流程</div><div class="video-grid" style="grid-template-columns:1fr"><a class="video-card" href="${COOLDOWN.video}" target="_blank" rel="noopener"><div class="vt">🧘</div><div class="vtitle">训练后 5-10 分钟拉伸</div></a></div></div></section>`;
+  pg.innerHTML=html;
+}
+
+/* ========== 6. renderDiet ========== */
+function renderDiet(){
+  const pg=document.querySelector('[data-page="diet"]');
+  const html=`<section class="hero" style="min-height:auto;padding-top:64px"><div class="hero-inner"><div class="hero-eyebrow">饮食指南</div><h1 class="hero-title">Eat<b>.</b></h1><div class="hero-sub">不用戒碳水 · 训练前供能 · 训练后修复</div></div></section>
+  <section class="sec">
+    <div class="card"><div class="sec-eyebrow">核心原则</div><div style="font-size:15px;line-height:1.7;color:#f5f5f7;margin-bottom:4px"><b style="color:#ffb86b">不用戒碳水</b> — 重点是<b style="color:var(--accent)">什么时候吃</b>和<b style="color:var(--accent)">吃什么种类</b></div></div>
+    <div class="card"><div class="sec-eyebrow">一日方案</div>
+      <div class="plan-row"><span><b>训练前 20-30 分钟</b></span><span class="tag">垫一点</span></div><div style="font-size:13px;color:var(--muted);padding:4px 0 10px">香蕉 1 根 / 全麦面包 1 片 → 给训练供能</div>
+      <div class="plan-row"><span><b>训练后那顿饭</b></span><span class="tag ok">重点</span></div><div style="font-size:13px;color:var(--muted);padding:4px 0 10px">米饭照吃 + <b style="color:#ffb86b">加大蛋白质</b>（≥30g）→ 肌肉修复窗口</div>
+      <div class="plan-row"><span><b>白天主餐（非训练日）</b></span><span class="tag warn">减半</span></div><div style="font-size:13px;color:var(--muted);padding:4px 0 10px">米饭<b>减半</b> + 1肉1菜 + 主食<b>一半换粗粮</b></div>
+      <div class="plan-row"><span><b>睡前</b></span><span class="tag">减碳水</span></div><div style="font-size:13px;color:var(--muted);padding:4px 0 4px">不吃碳水，吃<b>蛋白质</b>（酸奶/鸡蛋/蛋白粉）</div>
+    </div>
+    <div class="card"><div class="sec-eyebrow">蛋白 / 碳水比例</div>
+      <div class="stats"><div class="s ok"><div class="v">92g</div><div class="l">每日蛋白目标</div></div><div class="s"><div class="v">3:5</div><div class="l">训练日</div></div><div class="s"><div class="v">2:3</div><div class="l">休息日</div></div></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:10px;line-height:1.9">66kg × 1.4g/kg ≈ 92g 蛋白/天<br>约 3个鸡蛋 + 150g瘦肉 + 1勺蛋白粉 + 1盒牛奶</div>
+    </div>
+    <div class="card"><div class="sec-eyebrow">🚫 必须戒掉</div><div style="font-size:14px;color:#ff8a80;line-height:2">• 含糖饮料（可乐/雪碧/冰红茶…）<br>• 奶茶（一杯 ≈ 50g 糖 = 10 勺）</div></div>
+    <div class="card"><div class="sec-eyebrow">🍗 便利店速查</div><div style="font-size:14px;line-height:2;color:#f5f5f7">• 茶叶蛋 = 6g蛋白 · 2.5元<br>• 即食鸡胸 = 20g蛋白 · 15元<br>• 黄焖鸡（去皮）= 25g蛋白 · 25元<br>• 牛奶 250ml = 7g蛋白 · 3元</div></div>
+  </section>`;
+  pg.innerHTML=html;
+}
+
+/* ========== 7. renderLog ========== */
+function renderLog(){
+  const pg=document.querySelector('[data-page="log"]');
+  const k=weekdayCode(); const plan=DATA[k]; const dk=dateKey();
+  const realItems=plan&&!plan.skip?plan.items.filter(it=>it.id!=="t0"):[]; let doneToday=0;
+  realItems.forEach(it=>{if(data.checkins[dk+"_"+it.id])doneToday++;});
+  let html=`<section class="hero" style="min-height:auto;padding-top:64px"><div class="hero-inner"><div class="hero-eyebrow">记录</div><h1 class="hero-title">Track<b>.</b></h1><div class="hero-sub">数据本地保存 · 换手机请先导出</div></div></section><section class="sec">
+    <div class="card"><div class="sec-eyebrow">本周训练</div>${weekGrid()}<div class="stats" style="margin-top:14px"><div class="s ok"><div class="v">${doneToday}/${realItems.length||0}</div><div class="l">今日进度</div></div><div class="s"><div class="v">${countDoneLast7()}</div><div class="l">近7天完成</div></div><div class="s"><div class="v">${countActiveDaysLast7()}</div><div class="l">近7天训练天</div></div></div></div>
+    <div class="card"><div class="sec-eyebrow">今日身体数据</div>${metricInputRow("weight","体重(kg)")}${metricInputRow("waist","腰围(cm)")}${metricInputRow("sleep","睡眠(h)")}</div>
+    <div class="card"><div class="sec-eyebrow">历史记录</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><button class="btn ghost" data-show="weight">体重</button><button class="btn ghost" data-show="waist">腰围</button><button class="btn ghost" data-show="sleep">睡眠</button></div>
+      <div class="metric-log" id="metricLog"></div>
+    </div>
+  </section>`;
+  pg.innerHTML=html;
+  pg.querySelectorAll('.metric-add').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.type;const input=b.parentElement.querySelector('input');const v=input.value;if(!v){toast("请输入数值");return;}const arr=data.metrics[t]||[];arr.push({date:dateKey(),value:parseFloat(v),ts:Date.now()});data.metrics[t]=arr;saveAll(data);input.value="";renderLog();showMetricLog("weight");toast("✓ 已保存");}));
+  pg.querySelectorAll('[data-show]').forEach(b=>b.addEventListener('click',()=>showMetricLog(b.dataset.show)));
+  showMetricLog("weight");
+}
+function metricInputRow(type,label){return `<div class="input-row"><label>${label}</label><input type="number" step="0.1" min="0" placeholder="今日记录"><button class="btn primary metric-add" data-type="${type}">记录</button></div>`;}
+function showMetricLog(type){const map={weight:"体重",waist:"腰围",sleep:"睡眠"};const unit=type==="weight"?"kg":(type==="waist"?"cm":"h");const arr=(data.metrics[type]||[]).slice().sort((a,b)=>b.ts-a.ts).slice(0,20);const box=document.querySelector('#metricLog');if(!box)return;if(arr.length===0){box.innerHTML=`<div class="empty">暂无 ${map[type]} 记录</div>`;return;}box.innerHTML=arr.map(x=>`<div class="row"><span>${x.date}</span><span style="color:var(--accent);font-weight:400">${x.value}${unit}</span></div>`).join("");}
+function countDoneLast7(){let c=0;for(let d=0;d<7;d++){const dd=new Date();dd.setDate(dd.getDate()-d);const k=weekdayCode(dd);const p=DATA[k];if(!p||p.skip)continue;(p.items||[]).filter(i=>i.id!=="t0").forEach(i=>{if(data.checkins[dateKey(dd)+"_"+i.id])c++;});}return c;}
+function countActiveDaysLast7(){let c=0;for(let d=0;d<7;d++){const dd=new Date();dd.setDate(dd.getDate()-d);const k=weekdayCode(dd);const p=DATA[k];if(!p||p.skip)continue;const items=(p.items||[]).filter(i=>i.id!=="t0");if(items.length>0&&items.some(i=>data.checkins[dateKey(dd)+"_"+i.id]))c++;}return c;}
+
+/* ========== 8. renderMe ========== */
+function renderMe(){
+  const pg=document.querySelector('[data-page="me"]');
+  const html=`<section class="hero" style="min-height:auto;padding-top:64px"><div class="hero-inner"><div class="hero-eyebrow">我的</div><h1 class="hero-title">你好，斐然<b>.</b></h1><div class="hero-sub">持续 · 进步 · 从容</div></div></section><section class="sec">
+    <div class="card"><div class="sec-eyebrow">个人档案</div>
+      <div style="display:flex;gap:14px;align-items:center;margin-top:6px">
+        <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#ff7a18,#ffb86b);display:grid;place-items:center;font-size:28px;flex:0 0 60px;box-shadow:0 0 20px rgba(255,122,24,.35)">🏃</div>
+        <div style="flex:1"><div style="font-size:16px;font-weight:500;color:#f5f5f7">卢斐然</div><div style="font-size:12px;color:var(--muted);margin-top:2px">男 · 23岁 · 165cm · 66.1kg</div><div style="font-size:12px;color:#ffb86b;margin-top:2px">BMI 24.3 · 接近超重 · 减脂塑形</div></div>
+      </div></div>
+    <div class="card"><div class="sec-eyebrow">🩺 体检提醒</div><div style="font-size:13px;line-height:2;color:#f5f5f7;margin-top:4px">血常规：<b style="color:#ff8a80">小细胞低色素</b><br>RBC 6.74↑ · MCV 66.2↓ · MCH 21.4↓ · RDW 18.0↑<br>疑似 <b style="color:#ffb86b">轻型地贫 / 缺铁性贫血</b><br>→ 有氧心率 110-130 即可<br>→ 尽快复查血常规 + 铁蛋白</div></div>
+    <div class="card"><div class="sec-eyebrow">🏋️ 办卡省钱</div><div style="font-size:14px;line-height:2;color:#f5f5f7">• 选<b style="color:var(--accent)">公司 3km 内</b>的健身房（下班顺路）<br>• 先<b style="color:var(--accent)">月卡/次卡</b>体验 3 个月<br>• 闲鱼二手卡通常省 30-50%</div></div>
+    <div class="card"><div class="sec-eyebrow">📲 添加到主屏幕</div><div style="font-size:14px;line-height:2;color:#f5f5f7"><b style="color:#ffb86b">iPhone：</b>底部 分享 → 添加到主屏幕<br><b style="color:#ffb86b">安卓：</b>右上角 ⋮ → 添加到主屏幕</div></div>
+    <div class="card"><div class="sec-eyebrow">💾 数据备份</div><div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.9">换手机 / 清缓存 → 数据会丢失！<br><b style="color:var(--accent)">定期导出</b>到备忘录或微信文件传输助手。</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn primary full" id="btnExport">📤 导出数据</button>
+        <button class="btn full" id="btnImport">📥 从备份恢复</button>
+        <button class="btn ghost full" id="btnLogout">🔐 退出登录</button>
+        <button class="btn ghost full" id="btnClear">🗑 清空全部</button>
+      </div>
+    </div>
+    <div style="text-align:center;padding:28px 20px;font-size:11px;color:rgba(245,245,245,.35);letter-spacing:.12em;text-transform:uppercase">Patience · v1.0 · 从容训练助手</div>
+  </section>`;
+  pg.innerHTML=html;
+  document.querySelector('#btnExport').addEventListener('click',doExport);
+  document.querySelector('#btnImport').addEventListener('click',doImport);
+  document.querySelector('#btnLogout').addEventListener('click',()=>{if(confirm("退出后需重新输入密码")){localStorage.removeItem("patience_auth_v1");location.reload();}});
+  document.querySelector('#btnClear').addEventListener('click',()=>{if(confirm('⚠ 清空全部打卡、体重、腰围、睡眠记录？不可恢复！')){localStorage.removeItem(LS_KEY);data=loadAll();renderAll();toast("已清空");}});
+}
+
+/* ========== 9. 导入 / 导出 ========== */
+function doExport(){const blob=JSON.stringify(data,null,2);openModal({title:"📤 导出数据",body:`<div style="font-size:12px;color:var(--muted);margin-bottom:10px">长按文本框全选 → 复制 → 粘贴到手机备忘录</div><textarea readonly id="exportTA">${blob}</textarea><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn primary" id="copyBtn">📋 复制</button><button class="btn" id="downloadBtn">💾 下载</button></div>`});const body=document.querySelector('#modalBody');body.querySelector('#copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText(blob);toast("✓ 已复制");}catch(e){const ta=body.querySelector('#exportTA');ta.select();document.execCommand('copy');toast("✓ 已复制");}};body.querySelector('#downloadBtn').onclick=()=>{const b=new Blob([blob],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="patience-backup-"+dateKey()+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);toast("已触发下载");};}
+function doImport(){openModal({title:"📥 从备份恢复",body:`<div style="font-size:13px;color:var(--muted);margin-bottom:10px">⚠ 导入将<b style="color:#ff8a80">覆盖当前全部数据</b>！</div><textarea id="importTA" placeholder="粘贴之前导出的 JSON..."></textarea><div style="display:flex;gap:8px;margin-top:12px"><button class="btn ghost" id="cancelImport">取消</button><button class="btn danger" id="confirmImport">⚠ 确认覆盖</button></div><div id="importMsg" style="margin-top:10px;font-size:12px"></div>`});const body=document.querySelector('#modalBody');body.querySelector('#cancelImport').onclick=closeModal;body.querySelector('#confirmImport').onclick=()=>{const raw=body.querySelector('#importTA').value.trim();const msgBox=body.querySelector('#importMsg');if(!raw){msgBox.innerHTML=`<span style="color:#ff8a80">请先粘贴</span>`;return;}let parsed;try{parsed=JSON.parse(raw);}catch(e){msgBox.innerHTML=`<span style="color:#ff8a80">❌ JSON 格式错误</span>`;return;}if(!parsed||parsed.schema!==1){msgBox.innerHTML=`<span style="color:#ff8a80">❌ 无效备份</span>`;return;}parsed=Object.assign({},DEFAULT_DATA,parsed);parsed.metrics=Object.assign({},DEFAULT_DATA.metrics,parsed.metrics||{});parsed.progress=parsed.progress||{};for(const k of Object.keys(DEFAULT_DATA.metrics)){if(!Array.isArray(parsed.metrics[k]))parsed.metrics[k]=[];}saveAll(parsed);data=loadAll();closeModal();renderAll();toast("✅ 恢复成功");};}
+
+/* ========== 10. Modal & Toast ========== */
+const modal=document.querySelector('#modal');
+document.querySelector('#modalClose').addEventListener('click',closeModal);
+modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
+function openModal({title,body}){document.querySelector('#modalTitle').textContent=title;document.querySelector('#modalBody').innerHTML=body;modal.classList.add('show');}
+function closeModal(){modal.classList.remove('show');}
+let _toastTimer;
+function toast(msg){const t=document.querySelector('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),1800);}
+
+/* ========== 11. Tab / 锚点切换 ========== */
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelector(`[data-page="${t.dataset.tab}"]`).classList.add('active');updateTopBadge();window.scrollTo({top:0,behavior:'smooth'});}));
+document.querySelectorAll('[data-link]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));const tab=a.dataset.link;const t=document.querySelector(`.tab[data-tab="${tab}"]`);if(t)t.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelector(`[data-page="${tab}"]`).classList.add('active');updateTopBadge();window.scrollTo({top:0,behavior:'smooth'});}));
+
+function updateTopBadge(){const p=DATA[weekdayCode()];const label=!p||p.skip?(p&&p.isRest?p.theme:"休息日"):p.theme.split("（")[0].trim();document.querySelector('#weekBadge').textContent=(p.day||"-")+" · "+label;}
+
+/* ========== 12. PWA manifest ========== */
+try{const manifest={name:"Patience",short_name:"Patience",description:"Patience · 从容训练助手",start_url:"./",display:"standalone",orientation:"portrait",background_color:"#0a0a0c",theme_color:"#0a0a0c",icons:[{src:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'><rect width='144' height='144' rx='32' fill='%230a0a0c'/><circle cx='72' cy='72' r='44' fill='none' stroke='%23ff7a18' stroke-width='10' stroke-linecap='round' stroke-dasharray='138' stroke-dashoffset='40' transform='rotate(-90 72 72)'/><circle cx='72' cy='72' r='10' fill='%23ff7a18'/></svg>",sizes:"144x144",type:"image/svg+xml",purpose:"any"}]};const bl=new Blob([JSON.stringify(manifest)],{type:"application/manifest+json"});const link=document.createElement("link");link.rel="manifest";link.href=URL.createObjectURL(bl);document.head.appendChild(link);}catch(e){}
+
+/* ========== 13. 启动 ========== */
+let data=loadAll();
+function renderAll(){renderPlan();renderLibrary();renderVideo();renderDiet();renderLog();renderMe();updateTopBadge();}
+try{renderAll();}catch(err){document.querySelector('[data-page="plan"]').innerHTML=`<div class="card" style="padding:24px;text-align:center"><div style="color:#ff8a80;font-size:14px">渲染出错：${err.message}</div></div>`;console.error(err);}
+const now=new Date();const g=now.getHours()<12?"早上好":(now.getHours()<18?"下午好":"晚上好");const subEl=document.querySelector('#subInfo');if(subEl)subEl.textContent=g+"，斐然";
+console.log("%c Patience ","background:#ff7a18;color:#0a0a0c;padding:2px 10px;border-radius:4px;font-size:12px;font-weight:600;letter-spacing:.03em");
+console.log(g+"，斐然！今天是 "+dateKey()+" · "+["日","一","二","三","四","五","六"][now.getDay()]);
+</script>
+</body>
+</html>
