@@ -384,7 +384,7 @@ function renderPlan(){
         <div class="ex-name">训练后拉伸 · 必做</div>
         <div class="ex-meta"><span>${COOLDOWN.sets}</span></div>
         <div class="ex-tip">${COOLDOWN.tips}</div>
-        <a class="btn primary" href="${COOLDOWN.video}" target="_blank" rel="noopener" style="margin-top:10px">▶ 拉伸视频</a>
+        <button class="btn primary" onclick="showVideo('${COOLDOWN.video}')" style="margin-top:10px">▶ 拉伸视频</button>
       </div></div>
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn ghost" id="resetToday2">🔄 重置今日</button>
@@ -462,19 +462,19 @@ function renderLibrary(){
       html+=`<div class="ex" data-lib="${it.id}"><div class="ex-icon">${it.icon}</div><div class="ex-info"><div class="ex-name">${it.name}</div><div class="ex-meta"><span>${it.sets}×${it.reps}</span><span>休 ${it.rest}s</span></div></div><span style="color:rgba(245,245,245,.3);align-self:center;font-size:18px">›</span></div>`;
     }); html+=`</div>`;
   });
-  html+=`<div class="card" style="padding:24px;text-align:center;background:rgba(255,122,24,.04);border-color:rgba(255,122,24,.15)"><div class="sec-eyebrow">每次必做</div><div style="font-size:16px;font-weight:500;color:#f5f5f7;margin-bottom:4px">训练后完整拉伸</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px">${COOLDOWN.tips}</div><a class="btn primary" href="${COOLDOWN.video}" target="_blank" rel="noopener">▶ B站拉伸视频</a></div></section>`;
+  html+=`<div class="card" style="padding:24px;text-align:center;background:rgba(255,122,24,.04);border-color:rgba(255,122,24,.15)"><div class="sec-eyebrow">每次必做</div><div style="font-size:16px;font-weight:500;color:#f5f5f7;margin-bottom:4px">训练后完整拉伸</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px">${COOLDOWN.tips}</div><button class="btn primary" onclick="showVideo('${COOLDOWN.video}')">▶ 拉伸视频</button></div></section>`;
   pg.innerHTML=html;
   pg.querySelectorAll('[data-lib]').forEach(el=>el.addEventListener('click',()=>{let target=null;for(const wk of Object.keys(DATA)){const it=DATA[wk].items.find(x=>x.id===el.dataset.lib);if(it){target=it;break;}}if(target)showExerciseDetail(target);}));
 }
-function showExerciseDetail(it){const body=`<div class="ex-meta" style="margin-bottom:14px"><span class="tag">组数 ${it.sets}</span><span class="tag">次数 ${it.reps}</span><span class="tag">休息 ${it.rest}s</span></div><div class="ex-tip" style="font-size:13px">💡 ${it.tips}</div><div class="hr"></div><a class="btn primary full" href="${it.video}" target="_blank" rel="noopener">▶ 前往 B站观看</a>${it.backup?`<div style="height:8px"></div><a class="btn ghost full" href="${it.backup}" target="_blank" rel="noopener">🔄 备用链接</a>`:""}`;openModal({title:it.icon+" "+it.name,body});}
+function showExerciseDetail(it){const body=`<div class="ex-meta" style="margin-bottom:14px"><span class="tag">组数 ${it.sets}</span><span class="tag">次数 ${it.reps}</span><span class="tag">休息 ${it.rest}s</span></div><div class="ex-tip" style="font-size:13px">💡 ${it.tips}</div><div class="hr"></div><button class="btn primary full" onclick="showVideo('${it.video}')">▶ 在线观看</button>${it.backup?`<div style="height:8px"></div><button class="btn ghost full" onclick="showVideo('${it.backup}')">🔄 备用源</button>`:""}`;openModal({title:it.icon+" "+it.name,body});}
 
 /* ========== 5. renderVideo ========== */
 function renderVideo(){
   const pg=document.querySelector('[data-page="video"]');
   const all=[]; ["mon","wed","fri","sat"].forEach(k=>{(DATA[k].items||[]).forEach(it=>{if(it.id!=="t0")all.push(Object.assign({_k:k},it));});});
   let html=`<section class="hero" style="min-height:auto;padding-top:64px"><div class="hero-inner"><div class="hero-eyebrow">视频教学</div><h1 class="hero-title">Videos<b>.</b></h1><div class="hero-sub">${all.length} 个 B站教程 · 一步到位</div></div></section><section class="sec"><div class="video-grid">`;
-  all.forEach(it=>{html+=`<a class="video-card" href="${it.video}" target="_blank" rel="noopener"><div class="vt">${it.icon}</div><div class="vtitle">${it.name}</div><div style="font-size:10px;color:rgba(245,245,245,.4);margin-top:3px;letter-spacing:.03em">${DATA[it._k].day} · ${it.sets}×${it.reps}</div></a>`;});
-  html+=`</div></section><section class="sec"><div class="card" style="text-align:center;padding:24px;background:rgba(255,122,24,.04);border-color:rgba(255,122,24,.15)"><div class="sec-eyebrow">每次必看</div><div style="font-size:16px;font-weight:500;margin-bottom:12px">训练后完整拉伸流程</div><div class="video-grid" style="grid-template-columns:1fr"><a class="video-card" href="${COOLDOWN.video}" target="_blank" rel="noopener"><div class="vt">🧘</div><div class="vtitle">训练后 5-10 分钟拉伸</div></a></div></div></section>`;
+  all.forEach(it=>{html+=`<div class="video-card" onclick="showVideo('${it.video}')" style="cursor:pointer"><div class="vt">${it.icon}</div><div class="vtitle">${it.name}</div><div style="font-size:10px;color:rgba(245,245,245,.4);margin-top:3px;letter-spacing:.03em">${DATA[it._k].day} · ${it.sets}×${it.reps}</div></div>`;});
+  html+=`</div></section><section class="sec"><div class="card" style="text-align:center;padding:24px;background:rgba(255,122,24,.04);border-color:rgba(255,122,24,.15)"><div class="sec-eyebrow">每次必看</div><div style="font-size:16px;font-weight:500;margin-bottom:12px">训练后完整拉伸流程</div><div class="video-grid" style="grid-template-columns:1fr"><div class="video-card" onclick="showVideo('${COOLDOWN.video}')" style="cursor:pointer"><div class="vt">🧘</div><div class="vtitle">训练后 5-10 分钟拉伸</div></div></div></div></section>`;
   pg.innerHTML=html;
 }
 
@@ -563,6 +563,17 @@ document.querySelector('#modalClose').addEventListener('click',closeModal);
 modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
 function openModal({title,body}){document.querySelector('#modalTitle').textContent=title;document.querySelector('#modalBody').innerHTML=body;modal.classList.add('show');}
 function closeModal(){modal.classList.remove('show');}
+/* ===== B站嵌入式播放器 ===== */
+function bvFromUrl(url){if(!url)return"";const m=url.match(/BV[a-zA-Z0-9]+/);return m?m[0]:"";}
+function showVideo(url){
+  const bv=bvFromUrl(url);
+  if(!bv){toast("无视频链接");return;}
+  const src="https://player.bilibili.com/player.html?bvid="+bv+"&autoplay=0&high_quality=1&danmaku=0&as_wide=1";
+  const body='<div style="font-size:12px;color:var(--muted);margin-bottom:10px">直接在页面内播放 · 若提示"视频已丢失"说明该视频已从 B站下架，可点下方按钮跳转查看或反馈给斐然替换</div>'+
+    '<iframe src="'+src+'" style="width:100%;aspect-ratio:16/9;border:none;border-radius:12px;background:#000" allowfullscreen frameborder="0" scrolling="no" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"></iframe>'+
+    '<div style="display:flex;gap:8px;margin-top:12px"><a class="btn primary full" href="'+url+'" target="_blank" rel="noopener">🔗 在 B站 App 查看</a></div>';
+  openModal({title:"▶ 动作教学",body});
+}
 let _toastTimer;
 function toast(msg){const t=document.querySelector('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),1800);}
 
