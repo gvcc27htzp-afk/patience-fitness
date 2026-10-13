@@ -266,7 +266,7 @@ window.addEventListener("error",function(e){
 
 /* ========== 1. DATA ========== */
 const DATA={
-  mon:{day:"周一",theme:"胸 + 前束 + 三头（推日）",duration:"约60分钟",items:[
+  mon:{day:"推日",theme:"胸 + 前束 + 三头（推日）",duration:"约60分钟",items:[
     {id:"m0",name:"全身热身",icon:"🔥",sets:1,reps:"2分钟",rest:0,tips:"关节环绕 + 动态拉伸 + 轻重量激活",video:"https://www.bilibili.com/video/BV1NJG1znEg2/"},
     {id:"m1",name:"史密斯平板卧推",icon:"🏋️",sets:3,reps:"8次",rest:90,tips:"轨迹固定不晃：肩胛下沉后收贴凳、握距适中、杠稳稳下放到中胸、推起不耸肩，力量全部给胸",video:"https://www.bilibili.com/video/BV1X7HozXEa5/"},
     {id:"m2",name:"坐姿器械推胸",icon:"🏋️",sets:4,reps:"10次",rest:75,tips:"两个哑铃推合并成一个器械推：座椅调到握把对准上胸高度（补上斜角度）、肩胛下沉后收贴靠垫、顶峰停1秒、回放2-3秒控制",video:""},
@@ -274,8 +274,8 @@ const DATA={
     {id:"m5",name:"绳索下压(三头)",icon:"💪",sets:3,reps:"12次",rest:45,tips:"大臂夹紧固定、小臂沿弧线下压",video:"https://www.bilibili.com/video/BV1XpRcBZEr8/",backup:"https://www.bilibili.com/video/BV1Nn4y1d7jx/"},
     {id:"m6",name:"蝴蝶机夹胸(收尾轰炸)",icon:"🦋",sets:3,reps:"15次",rest:45,tips:"泵感收尾：轻重量、肘微屈固定、用胸带大臂向内夹、顶峰夹紧1秒、回放2-3秒不松力",video:""}
   ]},
-  tue:{day:"周二",theme:"休息日",duration:"完全休息",isRest:true,skip:true,items:[{id:"t0",name:"完全休息",icon:"😴",sets:0,reps:"",rest:0,tips:"练后让肌肉和神经修复",video:""}]},
-  wed:{day:"周三",theme:"背 + 中后束 + 二头（拉日）",duration:"约60分钟",items:[
+  tue:{day:"休息日",theme:"完全休息",duration:"完全休息",skip:true,items:[{id:"t0",name:"完全休息",icon:"😴",sets:0,reps:"",rest:0,tips:"练后让肌肉和神经修复",video:""}]},
+  wed:{day:"拉日",theme:"背 + 中后束 + 二头（拉日）",duration:"约60分钟",items:[
     {id:"w0",name:"全身热身",icon:"🔥",sets:1,reps:"2分钟",rest:0,tips:"关节环绕 + 动态拉伸 + 轻重量激活",video:"https://www.bilibili.com/video/BV1NJG1znEg2/"},
     {id:"w1",name:"直臂下压(激活+主项)",icon:"🎯",sets:3,reps:"15次",rest:60,tips:"今天第一个正式动作：肘微屈固定不弯、大臂沿弧线压向大腿、回落时让背阔拉长、顶峰停1秒",video:""},
     {id:"w2",name:"高位下拉",icon:"🏋️",sets:4,reps:"10次",rest:75,tips:"沉肩、肘内夹带背阔、顶端停顿；想象手臂只是钩子，用背把肘往下拉",video:"https://www.bilibili.com/video/BV1XZ421572q/"},
@@ -287,7 +287,7 @@ const DATA={
     {id:"w8",name:"面拉(收尾)",icon:"🎯",sets:3,reps:"15次",rest:45,tips:"退后半步、握绳末端、拉到额头高度时手停在耳朵外侧偏后、掌心翻向外、肘比手高、留2-3次余力",video:""}
   ]},
   thu:{day:"周四",theme:"休息日",duration:"完全休息",isRest:true,skip:true,items:[{id:"t0",name:"完全休息",icon:"😴",sets:0,reps:"",rest:0,tips:"让身体修复",video:""}]},
-  fri:{day:"周五",theme:"腿 + 有氧（腿日）",duration:"约60分钟",items:[
+  fri:{day:"腿日",theme:"腿 + 快走有氧（腿日）",duration:"约60分钟",items:[
     {id:"f0",name:"全身热身",icon:"🔥",sets:1,reps:"2分钟",rest:0,tips:"关节环绕 + 动态拉伸 + 轻重量激活",video:"https://www.bilibili.com/video/BV1NJG1znEg2/"},
     {id:"f1",name:"史密斯深蹲",icon:"🏋️",sets:3,reps:"12次",rest:90,tips:"史密斯架出杠，双脚与肩同宽，下蹲时膝对脚尖",video:"https://www.bilibili.com/video/BV1wxn9zZE6N/"},
     {id:"f2",name:"保加利亚蹲",icon:"🏋️",sets:3,reps:"12次/侧",rest:60,tips:"后脚搭在凳面上、重心全压前腿、前膝对脚尖、躯干微前倾；已练2周期动作已熟练，每1-2周试着加重",video:"https://www.bilibili.com/video/BV1ekjSzRE49/"},
@@ -308,22 +308,27 @@ const RING_R=54;
 
 /* ========== 2. 数据层 ========== */
 const LS_KEY="feiran_fit_v1";
-const DEFAULT_DATA={schema:1,checkins:{},metrics:{weight:[],waist:[],sleep:[],body_fat:[]},progress:{}};
-function loadAll(){try{const r=JSON.parse(localStorage.getItem(LS_KEY)||"null");if(r&&r.schema===1){const d=Object.assign({},DEFAULT_DATA,r);d.metrics=Object.assign({},DEFAULT_DATA.metrics,r.metrics||{});for(const k of Object.keys(DEFAULT_DATA.metrics)){if(!Array.isArray(d.metrics[k]))d.metrics[k]=[];}return d;}}catch(e){}return JSON.parse(JSON.stringify(DEFAULT_DATA));}
+const DEFAULT_DATA={schema:1,checkins:{},metrics:{weight:[],waist:[],sleep:[],body_fat:[]},progress:{},cycleDay:0,cycleLog:{}};
+function loadAll(){try{const r=JSON.parse(localStorage.getItem(LS_KEY)||"null");if(r&&r.schema===1){const d=Object.assign({},DEFAULT_DATA,r);d.metrics=Object.assign({},DEFAULT_DATA.metrics,r.metrics||{});for(const k of Object.keys(DEFAULT_DATA.metrics)){if(!Array.isArray(d.metrics[k]))d.metrics[k]=[];}if(typeof d.cycleDay!=="number"||d.cycleDay<0||d.cycleDay>3)d.cycleDay=0;if(!d.cycleLog||typeof d.cycleLog!=="object")d.cycleLog={};return d;}}catch(e){}return JSON.parse(JSON.stringify(DEFAULT_DATA));}
 function saveAll(d){try{localStorage.setItem(LS_KEY,JSON.stringify(d));}catch(e){console.warn("保存数据失败",e);}}
 function dateKey(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function weekdayCode(d){d=d||new Date();return["sun","mon","tue","wed","thu","fri","sat"][d.getDay()];}
+/* 4天循环：推 → 拉 → 腿 → 休 */
+const CYCLE=["mon","wed","fri","tue"];
+function todayKey(){const i=(data&&typeof data.cycleDay==="number")?data.cycleDay:0;return CYCLE[i%4];}
+function planKeyForDate(dd){const dk=dateKey(dd);if(dk===dateKey())return todayKey();if(data&&data.cycleLog&&Object.prototype.hasOwnProperty.call(data.cycleLog,dk))return CYCLE[data.cycleLog[dk]%4];return weekdayCode(dd);}
 
 /* ========== 3. renderPlan ========== */
 function renderPlan(){
   const pg=document.querySelector('[data-page="plan"]');
-  const k=weekdayCode(); const plan=DATA[k]||{day:"今日",theme:"休息日",duration:"完全休息",skip:true,items:[]};
+  const k=todayKey(); const plan=DATA[k]||{day:"今日",theme:"休息日",duration:"完全休息",skip:true,items:[]};
   const dk=dateKey(); let doneCount=0;
   const realItems=(plan.items||[]).filter(it=>it.id!=="t0");
   realItems.forEach(it=>{if(data.checkins[dk+"_"+it.id])doneCount++;});
   const total=realItems.length; const pct=total>0?doneCount/total:0;
   const ringOffset=RING_CIRC*(1-pct);
-  const eyebrowLabel=plan.day+" · "+(plan.skip?(plan.isRest?"恢复":"休息日"):plan.theme.split("（")[0]);
+  const cyclePos="循环第"+((data.cycleDay||0)%4+1)+"天/4";
+  const eyebrowLabel=cyclePos+" · "+plan.day+(plan.skip?"":" · "+plan.theme.split("（")[0]);
 
   let html=`<section class="hero">
     <div class="hero-inner">
@@ -360,10 +365,11 @@ function renderPlan(){
       <div style="display:flex;gap:10px;margin-top:14px">
         <button class="btn ghost" id="resetToday">🔄 重置今日</button>
         <button class="btn primary" id="markAllDone">一键完成</button>
+        <button class="btn ghost" id="advanceDay">➡️ 下一天</button>
       </div>
     </div>`;
   }
-  html += `<div class="card"><div class="sec-eyebrow">周视图</div>${weekGrid()}</div>`;
+  html += `<div class="card"><div class="sec-eyebrow">训练循环 · 推 → 拉 → 腿 → 休</div>${weekGrid()}</div>`;
   if(!plan.skip){
     html += `<div class="sec-eyebrow" style="margin:28px 4px 10px">今日动作</div>`;
     realItems.forEach((it,i)=>{
@@ -386,12 +392,14 @@ function renderPlan(){
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn ghost" id="resetToday2">🔄 重置今日</button>
       <button class="btn primary" id="markAllDone2">一键完成</button>
+      <button class="btn ghost" id="advanceDay2">➡️ 下一天</button>
     </div>`;
   } else {
     html += `<div class="card" style="text-align:center;padding:32px">
       <div style="font-size:44px;margin-bottom:10px">${plan.isRest?"🚶":"😴"}</div>
       <div style="font-size:16px;color:#f5f5f7;font-weight:400;margin-bottom:6px">${plan.isRest?"恢复有氧":"完全休息"}</div>
-      <div style="font-size:13px;color:var(--muted)">让肌肉和神经完整修复</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">让肌肉和神经完整修复</div>
+      <button class="btn primary" id="advanceDay3">➡️ 休息完成 · 进入下一天</button>
     </div>`;
   }
   html += `</section>
@@ -413,6 +421,9 @@ function renderPlan(){
   pg.querySelectorAll('[data-detail]').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.detail;let target=null;for(const wk of Object.keys(DATA)){const it=DATA[wk].items.find(x=>x.id===id);if(it){target=it;break;}}if(target)showExerciseDetail(target);}));
   [['resetToday','重置今日打卡？'],['resetToday2','重置今日打卡？']].forEach(([id,msg])=>{const b=document.querySelector('#'+id);if(b)b.addEventListener('click',()=>{if(confirm(msg)){Object.keys(data.checkins).forEach(k=>{if(k.startsWith(dk))delete data.checkins[k];});saveAll(data);renderPlan();toast("已重置");}});});
   [['markAllDone','全部完成？'],['markAllDone2','全部完成？']].forEach(([id,msg])=>{const b=document.querySelector('#'+id);if(b)b.addEventListener('click',()=>{if(!plan.skip&&confirm(msg)){realItems.forEach(it=>{data.checkins[dk+"_"+it.id]=1;});saveAll(data);renderPlan();toast("✓ 已完成");}});});
+  const nextPlan=DATA[CYCLE[((data.cycleDay||0)+1)%4]];
+  const advMsg="进入下一天？（今天："+plan.day+" → 下一天："+nextPlan.day+"）";
+  ['advanceDay','advanceDay2','advanceDay3'].forEach(id=>{const b=document.querySelector('#'+id);if(b)b.addEventListener('click',()=>{if(confirm(advMsg)){data.cycleLog=data.cycleLog||{};data.cycleLog[dk]=(data.cycleDay||0)%4;data.cycleDay=((data.cycleDay||0)+1)%4;saveAll(data);renderAll();toast("→ "+DATA[CYCLE[data.cycleDay]].day);}});});
   const hs=document.querySelector('#heroStart'); if(hs)hs.addEventListener('click',()=>{pg.querySelector('.check')?.click();});
   pg.querySelectorAll('[data-link]').forEach(a=>a.addEventListener('click',e=>{
     e.preventDefault();
@@ -425,17 +436,18 @@ function renderPlan(){
 }
 
 function weekGrid(){
-  const d=new Date(); const today=d.getDay(); const names=["日","一","二","三","四","五","六"];
+  const d=new Date(); const today=d.getDay();
+  const nm={mon:"推",wed:"拉",fri:"腿",tue:"休",thu:"休",sat:"有",sun:"恢"};
   let html=`<div class="week">`;
   for(let i=0;i<7;i++){
     const dd=new Date(d); dd.setDate(d.getDate()-today+i);
-    const k=weekdayCode(dd); const plan=DATA[k]||{skip:true,items:[]};
+    const k=planKeyForDate(dd); const plan=DATA[k]||{skip:true,items:[]};
     const items=(plan.items||[]).filter(it=>it.id!=="t0");
     let cls=""; let status="待";
     if(plan.skip){cls="rest";status="休";}
     else{const done=items.length>0&&items.every(it=>data.checkins[dateKey(dd)+"_"+it.id]);if(done){cls+=" done";status="✓";}}
-    if(i===today){cls+=" today";}
-    html+=`<div class="d ${cls}"><div class="n">${names[i]}</div><div>${status}</div></div>`;
+    if(i===today){cls+=" today";if(status==="待")status="今";}
+    html+=`<div class="d ${cls}"><div class="n">${nm[k]||"·"}</div><div>${status}</div></div>`;
   }
   html+=`</div>`; return html;
 }
@@ -444,17 +456,17 @@ function weekGrid(){
 function renderLibrary(){
   const pg=document.querySelector('[data-page="library"]');
   const sections=[
-    {k:"mon",label:"周一 · 胸 + 前束 + 三头（推日）"},
-    {k:"wed",label:"周三 · 背 + 中后束 + 二头（拉日）"},
-    {k:"fri",label:"周五 · 腿 + 有氧（腿日）"},
-    {k:"sat",label:"周六 · 心肺（有氧）"},
-    {k:"sun",label:"周日 · 恢复有氧"}
+    {k:"mon",label:"第1天 · 推日（胸 + 前束 + 三头）"},
+    {k:"wed",label:"第2天 · 拉日（背 + 中后束 + 二头）"},
+    {k:"fri",label:"第3天 · 腿日（腿 + 快走有氧）"},
+    {k:"sat",label:"有氧日（心肺 · 按需插入）"},
+    {k:"sun",label:"恢复日（按需 · 恢复有氧）"}
   ];
   let total=0; sections.forEach(s=>{total+=(DATA[s.k].items||[]).filter(i=>i.id!=="t0").length;});
   let html=`<section class="hero" style="min-height:auto;padding-top:64px"><div class="hero-inner"><div class="hero-eyebrow">动作库</div><h1 class="hero-title">Library<b>.</b></h1><div class="hero-sub">${total} 个动作 · 按训练日分组</div></div></section><section class="sec">`;
   sections.forEach(sec=>{
     const p=DATA[sec.k];
-    html+=`<div class="card"><div class="sec-eyebrow">${sec.k==="sun"?"恢复":"训练"}</div><div style="font-size:16px;font-weight:500;color:#f5f5f7;margin-bottom:12px">${sec.label}</div>`;
+    html+=`<div class="card"><div class="sec-eyebrow">${sec.k==="sun"?"恢复":(sec.k==="sat"?"有氧":"训练")}</div><div style="font-size:16px;font-weight:500;color:#f5f5f7;margin-bottom:12px">${sec.label}</div>`;
     (p.items||[]).forEach(it=>{if(it.id==="t0")return;
       html+=`<div class="ex" data-lib="${it.id}"><div class="ex-icon">${it.icon}</div><div class="ex-info"><div class="ex-name">${it.name}</div><div class="ex-meta"><span>${it.sets}×${it.reps}</span><span>休 ${it.rest}s</span></div></div><span style="color:rgba(245,245,245,.3);align-self:center;font-size:18px">›</span></div>`;
     }); html+=`</div>`;
@@ -500,11 +512,11 @@ function renderDiet(){
 /* ========== 7. renderLog ========== */
 function renderLog(){
   const pg=document.querySelector('[data-page="log"]');
-  const k=weekdayCode(); const plan=DATA[k]; const dk=dateKey();
+  const k=todayKey(); const plan=DATA[k]; const dk=dateKey();
   const realItems=plan&&!plan.skip?plan.items.filter(it=>it.id!=="t0"):[]; let doneToday=0;
   realItems.forEach(it=>{if(data.checkins[dk+"_"+it.id])doneToday++;});
   let html=`<section class="hero" style="min-height:auto;padding-top:64px"><div class="hero-inner"><div class="hero-eyebrow">记录</div><h1 class="hero-title">Track<b>.</b></h1><div class="hero-sub">数据本地保存 · 换手机请先导出</div></div></section><section class="sec">
-    <div class="card"><div class="sec-eyebrow">本周训练</div>${weekGrid()}<div class="stats" style="margin-top:14px"><div class="s ok"><div class="v">${doneToday}/${realItems.length||0}</div><div class="l">今日进度</div></div><div class="s"><div class="v">${countDoneLast7()}</div><div class="l">近7天完成</div></div><div class="s"><div class="v">${countActiveDaysLast7()}</div><div class="l">近7天训练天</div></div></div></div>
+    <div class="card"><div class="sec-eyebrow">训练循环 · 推 → 拉 → 腿 → 休</div>${weekGrid()}<div class="stats" style="margin-top:14px"><div class="s ok"><div class="v">${doneToday}/${realItems.length||0}</div><div class="l">今日进度</div></div><div class="s"><div class="v">${countDoneLast7()}</div><div class="l">近7天完成</div></div><div class="s"><div class="v">${countActiveDaysLast7()}</div><div class="l">近7天训练天</div></div></div></div>
     <div class="card"><div class="sec-eyebrow">今日身体数据</div>${metricInputRow("weight","体重(kg)")}${metricInputRow("waist","腰围(cm)")}${metricInputRow("sleep","睡眠(h)")}</div>
     <div class="card"><div class="sec-eyebrow">历史记录</div>
       <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><button class="btn ghost" data-show="weight">体重</button><button class="btn ghost" data-show="waist">腰围</button><button class="btn ghost" data-show="sleep">睡眠</button></div>
@@ -518,8 +530,8 @@ function renderLog(){
 }
 function metricInputRow(type,label){return `<div class="input-row"><label>${label}</label><input type="number" step="0.1" min="0" placeholder="今日记录"><button class="btn primary metric-add" data-type="${type}">记录</button></div>`;}
 function showMetricLog(type){const map={weight:"体重",waist:"腰围",sleep:"睡眠"};const unit=type==="weight"?"kg":(type==="waist"?"cm":"h");const arr=(data.metrics[type]||[]).slice().sort((a,b)=>b.ts-a.ts).slice(0,20);const box=document.querySelector('#metricLog');if(!box)return;if(arr.length===0){box.innerHTML=`<div class="empty">暂无 ${map[type]} 记录</div>`;return;}box.innerHTML=arr.map(x=>`<div class="row"><span>${x.date}</span><span style="color:var(--accent);font-weight:400">${x.value}${unit}</span></div>`).join("");}
-function countDoneLast7(){let c=0;for(let d=0;d<7;d++){const dd=new Date();dd.setDate(dd.getDate()-d);const k=weekdayCode(dd);const p=DATA[k];if(!p||p.skip)continue;(p.items||[]).filter(i=>i.id!=="t0").forEach(i=>{if(data.checkins[dateKey(dd)+"_"+i.id])c++;});}return c;}
-function countActiveDaysLast7(){let c=0;for(let d=0;d<7;d++){const dd=new Date();dd.setDate(dd.getDate()-d);const k=weekdayCode(dd);const p=DATA[k];if(!p||p.skip)continue;const items=(p.items||[]).filter(i=>i.id!=="t0");if(items.length>0&&items.some(i=>data.checkins[dateKey(dd)+"_"+i.id]))c++;}return c;}
+function countDoneLast7(){let c=0;const keys=Object.keys(data.checkins);for(let d=0;d<7;d++){const dd=new Date();dd.setDate(dd.getDate()-d);const pfx=dateKey(dd)+"_";keys.forEach(k=>{if(k.startsWith(pfx))c++;});}return c;}
+function countActiveDaysLast7(){let c=0;const keys=Object.keys(data.checkins);for(let d=0;d<7;d++){const dd=new Date();dd.setDate(dd.getDate()-d);const pfx=dateKey(dd)+"_";if(keys.some(k=>k.startsWith(pfx)))c++;}return c;}
 
 /* ========== 8. renderMe ========== */
 function renderMe(){
@@ -578,7 +590,7 @@ function toast(msg){const t=document.querySelector('#toast');t.textContent=msg;t
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelector(`[data-page="${t.dataset.tab}"]`).classList.add('active');updateTopBadge();window.scrollTo({top:0,behavior:'smooth'});}));
 document.querySelectorAll('[data-link]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));const tab=a.dataset.link;const t=document.querySelector(`.tab[data-tab="${tab}"]`);if(t)t.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelector(`[data-page="${tab}"]`).classList.add('active');updateTopBadge();window.scrollTo({top:0,behavior:'smooth'});}));
 
-function updateTopBadge(){const p=DATA[weekdayCode()];const label=!p||p.skip?(p&&p.isRest?p.theme:"休息日"):p.theme.split("（")[0].trim();document.querySelector('#weekBadge').textContent=(p.day||"-")+" · "+label;}
+function updateTopBadge(){const p=DATA[todayKey()];const label=!p||p.skip?(p&&p.theme?p.theme:"休息日"):p.theme.split("（")[0].trim();document.querySelector('#weekBadge').textContent=(p.day||"-")+" · "+label;}
 
 /* ========== 12. PWA manifest ========== */
 try{const manifest={name:"Patience",short_name:"Patience",description:"Patience · 从容训练助手",start_url:"./",display:"standalone",orientation:"portrait",background_color:"#0a0a0c",theme_color:"#0a0a0c",icons:[{src:"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'><rect width='144' height='144' rx='32' fill='%230a0a0c'/><circle cx='72' cy='72' r='44' fill='none' stroke='%23ff7a18' stroke-width='10' stroke-linecap='round' stroke-dasharray='138' stroke-dashoffset='40' transform='rotate(-90 72 72)'/><circle cx='72' cy='72' r='10' fill='%23ff7a18'/></svg>",sizes:"144x144",type:"image/svg+xml",purpose:"any"}]};const bl=new Blob([JSON.stringify(manifest)],{type:"application/manifest+json"});const link=document.createElement("link");link.rel="manifest";link.href=URL.createObjectURL(bl);document.head.appendChild(link);}catch(e){}
